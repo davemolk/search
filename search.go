@@ -12,7 +12,13 @@ type searcher struct {
 	input io.Reader
 	output io.Writer
 	search string
-	terms []string
+	terms []string 
+	// search engines
+	ask *query
+	bing *query
+	brave *query
+	duck *query
+	yahoo *query
 }
 
 type option func(*searcher) error
@@ -86,6 +92,8 @@ func (s *searcher) readTerms() error {
 	return scan.Err()
 }
 
+
+
 func RunCLI() {
 	s, err := NewSearcher(
 		FromArgs(os.Args[1:]),
@@ -101,6 +109,12 @@ func RunCLI() {
 			os.Exit(1)
 		}
 	}
-	fmt.Println(s.search)
-	fmt.Println(s.terms)
+	s.createQueries()
+	ch := s.formatURL()
+
+	for c := range ch {
+		fmt.Println(c)	
+	}
+
+
 }
