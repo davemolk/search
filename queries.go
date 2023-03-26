@@ -12,7 +12,7 @@ type query struct {
 
 func (s *searcher) createQueries() {
 	s.ask = &query{
-		base:   fmt.Sprintf("%s%s", "https://www.ask.com/web?q=", s.search),
+		base:   "https://www.ask.com/web?q=",
 		blurbSelector: "div.PartialSearchResults-item p",
 		itemSelector:  "div.PartialSearchResults-item",
 		linkSelector:  "a.PartialSearchResults-item-title-link",
@@ -20,7 +20,7 @@ func (s *searcher) createQueries() {
 	}
 
 	s.bing = &query{
-		base:   fmt.Sprintf("%s%s", "https://bing.com/search?q=", s.search),
+		base:   "https://bing.com/search?q=",
 		blurbSelector: "div.b_caption p",
 		itemSelector:  "li.b_algo",
 		linkSelector:  "h2 a",
@@ -28,7 +28,7 @@ func (s *searcher) createQueries() {
 	}
 
 	s.brave = &query{
-		base:   fmt.Sprintf("%s%s", "https://search.brave.com/search?q=", s.search),
+		base:   "https://search.brave.com/search?q=",
 		blurbSelector: "div.snippet-content p.snippet-description",
 		itemSelector:  "div.fdb",
 		linkSelector:  "div.fdb > a.result-header",
@@ -36,7 +36,7 @@ func (s *searcher) createQueries() {
 	}
 
 	s.duck= &query{
-		base:   fmt.Sprintf("%s%s", "https://html.duckduckgo.com/html?q=", s.search),
+		base:   "https://html.duckduckgo.com/html?q=",
 		blurbSelector: "div.links_main > a",
 		itemSelector:  "div.web-result",
 		linkSelector:  "div.links_main > a",
@@ -44,7 +44,7 @@ func (s *searcher) createQueries() {
 	}
 
 	s.yahoo = &query{
-		base:   fmt.Sprintf("%s%s", "https://search.yahoo.com/search?p=", s.search),
+		base:   "https://search.yahoo.com/search?p=",
 		blurbSelector: "div.compText",
 		itemSelector:  "div.algo",
 		linkSelector:  "h3 > a",
@@ -55,15 +55,30 @@ func (s *searcher) createQueries() {
 func (s *searcher) formatURL() <-chan string {
 	// 5 search engines
 	out := make(chan string, len(s.terms) * 5)
-	go func() {
-		defer close(out)
-		for _, term := range s.terms {
-			out <- fmt.Sprintf("%s+%s\n", s.ask.base, term)
-			out <- fmt.Sprintf("%s+%s\n", s.bing.base, term)
-			out <- fmt.Sprintf("%s+%s\n", s.brave.base, term)
-			out <- fmt.Sprintf("%s+%s\n", s.duck.base, term)
-			out <- fmt.Sprintf("%s+%s\n", s.yahoo.base, term)
-		}
-	}()
+	switch {
+	case s.exact:
+		go func() {
+				defer close(out)
+				for _, term := range s.terms {
+					out <- fmt.Sprintf("%s\"%s+%s\"", s.ask.base, s.search, term)
+					out <- fmt.Sprintf("%s\"%s+%s\"", s.bing.base, s.search, term)
+					out <- fmt.Sprintf("%s\"%s+%s\"", s.brave.base, s.search, term)
+					out <- fmt.Sprintf("%s\"%s+%s\"", s.duck.base, s.search, term)
+					out <- fmt.Sprintf("%s\"%s+%s\"", s.yahoo.base, s.search, term)
+				}
+			}()
+	default:
+		go func() {
+			defer close(out)
+			for _, term := range s.terms {
+				out <- fmt.Sprintf("%s%s+%s", s.ask.base, s.search, term)
+				out <- fmt.Sprintf("%s%s+%s", s.bing.base, s.search, term)
+				out <- fmt.Sprintf("%s%s+%s", s.brave.base, s.search, term)
+				out <- fmt.Sprintf("%s%s+%s", s.duck.base, s.search, term)
+				out <- fmt.Sprintf("%s%s+%s", s.yahoo.base, s.search, term)
+			}
+		}()
+	}
+	
 	return out
 }

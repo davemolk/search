@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 type searcher struct {
+	exact bool
 	input io.Reader
+	multi bool
 	output io.Writer
 	search string
 	terms []string 
@@ -61,6 +64,8 @@ func FromArgs(args []string) option {
 	return func(s *searcher) error {
 		fset := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 		search := fset.String("s", "", "search term")
+		exact := fset.Bool("e", false, "exact matching")
+		multi := fset.Bool("m", false, "multiple terms")
 		fset.SetOutput(s.output)
 		err := fset.Parse(args)
 		if err != nil {
@@ -72,6 +77,8 @@ func FromArgs(args []string) option {
 		}
 
 		s.search = *search
+		s.exact = *exact
+		s.multi = *multi
 
 		// get terms
 		args = fset.Args()
@@ -85,14 +92,20 @@ func FromArgs(args []string) option {
 
 func (s *searcher) readTerms() error {
 	scan := bufio.NewScanner(s.input)
-	scan.Split(bufio.ScanWords)
+	if s.multi {
+		scan.Split(bufio.ScanLines)
+	} else {
+		scan.Split(bufio.ScanWords)
+	}
 	for scan.Scan() {
-		s.terms = append(s.terms, scan.Text())
+		text := scan.Text()
+		if s.multi {
+			text = strings.ReplaceAll(scan.Text(), " ", "+")
+		}
+		s.terms = append(s.terms, text)
 	}
 	return scan.Err()
 }
-
-
 
 func RunCLI() {
 	s, err := NewSearcher(
