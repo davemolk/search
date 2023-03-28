@@ -8,11 +8,13 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 type searcher struct {
 	// flags
 	exact bool
+	gophers int
 	length int
 	multi bool
 	osys string
@@ -78,6 +80,7 @@ func FromArgs(args []string) option {
 		to := fset.Int("to", 5000, "timeout in ms")
 		urls := fset.Bool("u", false, "print urls")
 		length := fset.Int("l", 500, "length of blurb")
+		gophers := fset.Int("g", 10, "max number of concurrent requests")
 		
 		fset.SetOutput(s.output)
 		err := fset.Parse(args)
@@ -104,6 +107,7 @@ func FromArgs(args []string) option {
 		s.timeout = *to
 		s.urls = *urls
 		s.length = *length
+		s.gophers = *gophers
 
 		// get terms
 		args = fset.Args()
@@ -152,12 +156,17 @@ func RunCLI() {
 	s.createQueries()
 	ch := s.formatURL()
 
-	// var wg sync.WaitGroup
+	tokens := make(chan struct{}, s.gophers)
+	var wg sync.WaitGroup
 	for c := range ch {
-		// wg.Add(1)
-		s.Search(c)
-		// wg.Done()
+		wg.Add(1)
+		tokens <- struct{}{}
+		go func(c string) {
+			defer wg.Done()
+			s.Search(c)
+			<-tokens
+		}(c)
 	}
 
-	// wg.Wait()
+	wg.Wait()
 }

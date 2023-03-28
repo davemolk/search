@@ -157,6 +157,8 @@ func (s *searcher) chrome(r *http.Request) *http.Request {
 	switch s.osys {
 	case "m":
 		r.Header.Set("sec-ch-ua-platform", "Macintosh")
+	case "l":
+		r.Header.Set("sec-ch-ua-platform", "Linux")
 	default:
 		r.Header.Set("sec-ch-ua-platform", "Windows")
 	}
