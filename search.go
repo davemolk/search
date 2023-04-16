@@ -5,10 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"regexp"
 	"strings"
 	"sync"
+	"time"
 )
 
 type searcher struct {
@@ -76,28 +78,26 @@ func FromArgs(args []string) option {
 		search := fset.String("s", "", "search term")
 		exact := fset.Bool("e", false, "exact matching")
 		multi := fset.Bool("m", false, "multiple terms")
-		osys := fset.String("o", "w", "m, l, or w")
+		osys := fset.String("os", "w", "m, l, or w")
 		to := fset.Int("to", 5000, "timeout in ms")
 		urls := fset.Bool("u", false, "print urls")
 		length := fset.Int("l", 500, "length of blurb")
 		gophers := fset.Int("g", 10, "max number of concurrent requests")
-		
 		fset.SetOutput(s.output)
+
 		err := fset.Parse(args)
 		if err != nil {
 			return err
 		}
 
-		if *search == "" {
-			fmt.Fprintln(os.Stderr, "must provide a search term")
-			os.Exit(1)
-		} else {
-			*search = strings.ReplaceAll(*search, " ", "+")
+		err = s.validateTerms(*search)
+		if err != nil {
+			return err
 		}
-
-		if *osys != "" && *osys != "m" && *osys != "w" && *osys != "l" {
-			fmt.Fprintln(os.Stderr, "invalid os input, now choosing w")
-			*osys = "w"
+		*search = strings.ReplaceAll(*search, " ", "+")
+		err = s.validateOS(*osys)
+		if err != nil {
+			return err
 		}
 
 		s.search = *search
@@ -109,12 +109,18 @@ func FromArgs(args []string) option {
 		s.length = *length
 		s.gophers = *gophers
 
-		// get terms
+		// get terms from args
 		args = fset.Args()
-		if len(args) < 1 {
+		if len(args) > 1 {
+			s.terms = args 
 			return nil
 		}
-		s.terms = args
+		// get terms from s.input if we didn't get from args
+		err = s.readTerms()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		return nil
 	}
 }
@@ -137,6 +143,9 @@ func (s *searcher) readTerms() error {
 }
 
 func RunCLI() {
+	// seed random number generator to get random user agents
+	rand.Seed(time.Now().UnixNano())
+
 	s, err := NewSearcher(
 		FromArgs(os.Args[1:]),
 	)
@@ -144,17 +153,9 @@ func RunCLI() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	// get terms from s.input if we didn't get from args
-	if len(s.terms) < 1 {
-		err = s.readTerms()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-	}
 	s.noBlank = regexp.MustCompile(`\s{2,}`)
 	s.createQueries()
-	ch := s.formatURL()
+	ch := s.FormatURL()
 
 	tokens := make(chan struct{}, s.gophers)
 	var wg sync.WaitGroup

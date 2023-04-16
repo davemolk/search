@@ -19,17 +19,3 @@ func TestFromArgsErrorOnBogusFlag(t *testing.T) {
 	}
 }
 
-/*
-func TestFromArgsEmpty(t *testing.T) {
-	t.Parallel()
-	args := []string{}
-	bufInput := bytes.NewBufferString("search terms\nhere")
-	s, err := search.NewSearcher(
-		search.WithInput(bufInput),
-		search.FromArgs(args),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-*/

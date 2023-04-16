@@ -13,11 +13,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// seed random number generator to get random user agents
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 // Search takes in a URL, makes a GET request, and parses the response
 // body, printing the results to s.output.
 func (s *searcher) Search(url string) error {

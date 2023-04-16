@@ -52,7 +52,7 @@ func (s *searcher) createQueries() {
 	}
 }
 
-func (s *searcher) formatURL() <-chan string {
+func (s *searcher) FormatURL() <-chan string {
 	// 5 search engines
 	out := make(chan string, len(s.terms) * 5)
 	switch {
