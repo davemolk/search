@@ -18,4 +18,3 @@ func TestFromArgsErrorOnBogusFlag(t *testing.T) {
 		t.Fatal("want error on bogus flag, got nil")
 	}
 }
-

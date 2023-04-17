@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"os"
 	"regexp"
@@ -14,25 +15,31 @@ import (
 )
 
 type searcher struct {
-	// flags
-	exact bool
-	gophers int
-	length int
-	multi bool
-	osys string
+	// query
+	exact  bool
+	multi  bool
 	search string
-	terms []string
-	timeout int 
-	urls bool
+	terms  []string
+
+	// requests
+	concurrency int
+	osys        string
+	timeout     int
+
+	// output
+	length  int
+	noBlank *regexp.Regexp
+	urls    bool
+
 	// search engines
-	ask *query
-	bing *query
+	ask   *query
+	bing  *query
 	brave *query
-	duck *query
+	duck  *query
 	yahoo *query
+
 	// other
-	input io.Reader
-	noBlank  *regexp.Regexp
+	input  io.Reader
 	output io.Writer
 }
 
@@ -40,7 +47,7 @@ type option func(*searcher) error
 
 func NewSearcher(opts ...option) (*searcher, error) {
 	s := &searcher{
-		input: os.Stdin,
+		input:  os.Stdin,
 		output: os.Stdout,
 	}
 	for _, opt := range opts {
@@ -75,14 +82,17 @@ func WithOutput(output io.Writer) option {
 func FromArgs(args []string) option {
 	return func(s *searcher) error {
 		fset := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
-		search := fset.String("s", "", "search term")
+		// query
 		exact := fset.Bool("e", false, "exact matching")
 		multi := fset.Bool("m", false, "multiple terms")
+		search := fset.String("s", "", "base search term")
+		//requests
+		concurrency := fset.Int("g", 10, "max number of concurrent requests")
 		osys := fset.String("os", "w", "m, l, or w")
 		to := fset.Int("to", 5000, "timeout in ms")
-		urls := fset.Bool("u", false, "print urls")
+		// output
 		length := fset.Int("l", 500, "length of blurb")
-		gophers := fset.Int("g", 10, "max number of concurrent requests")
+		urls := fset.Bool("u", false, "print urls")
 		fset.SetOutput(s.output)
 
 		err := fset.Parse(args)
@@ -107,12 +117,16 @@ func FromArgs(args []string) option {
 		s.timeout = *to
 		s.urls = *urls
 		s.length = *length
-		s.gophers = *gophers
+		s.concurrency = *concurrency
 
 		// get terms from args
 		args = fset.Args()
-		if len(args) > 1 {
-			s.terms = args 
+		if len(args) > 0 {
+			if *multi {
+				m := strings.Join(args, "+")
+				args = []string{m}
+			}
+			s.terms = args
 			return nil
 		}
 		// get terms from s.input if we didn't get from args
@@ -154,10 +168,16 @@ func RunCLI() {
 		os.Exit(1)
 	}
 	s.noBlank = regexp.MustCompile(`\s{2,}`)
-	s.createQueries()
+	s.CreateQueries()
 	ch := s.FormatURL()
 
-	tokens := make(chan struct{}, s.gophers)
+	// TODO remove
+	for c := range ch {
+		fmt.Println(c)
+	}
+	log.Fatal()
+
+	tokens := make(chan struct{}, s.concurrency)
 	var wg sync.WaitGroup
 	for c := range ch {
 		wg.Add(1)

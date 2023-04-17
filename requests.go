@@ -117,7 +117,6 @@ func (s *searcher) print(blurb, link string) {
 	fmt.Println()
 }
 
-
 func (s *searcher) headers(r *http.Request) *http.Request {
 	if rand.Intn(2) == 1 {
 		return s.ff(r)
