@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"math/rand"
 	"os"
 	"regexp"
@@ -171,12 +170,6 @@ func RunCLI() {
 	s.CreateQueries()
 	ch := s.FormatURL()
 
-	// TODO remove
-	for c := range ch {
-		fmt.Println(c)
-	}
-	log.Fatal()
-
 	tokens := make(chan struct{}, s.concurrency)
 	var wg sync.WaitGroup
 	for c := range ch {
@@ -184,8 +177,8 @@ func RunCLI() {
 		tokens <- struct{}{}
 		go func(c string) {
 			defer wg.Done()
+			defer func() { <-tokens }()
 			s.Search(c)
-			<-tokens
 		}(c)
 	}
 
