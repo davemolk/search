@@ -45,23 +45,26 @@ func (s *searcher) Search(url string) error {
 	var parse *query
 
 	switch {
-	case strings.HasPrefix(url, "https://www.ask"):
-		parse = s.ask
-	case strings.HasPrefix(url, "https://bing"):
-		parse = s.bing
 	case strings.HasPrefix(url, "https://search.b"):
 		parse = s.brave
 	case strings.HasPrefix(url, "https://html.d"):
 		parse = s.duck
-	case strings.HasPrefix(url, "https://search.y"):
-		parse = s.yahoo
+	case strings.HasPrefix(url, "https://www.mo"):
+		parse = s.mojeek
+	case strings.HasPrefix(url, "https://lite.qwant"):
+		parse = s.qwant
 	// return error if we didn't hit one of these!
 	default:
 		return fmt.Errorf("mismatched url, check if one of the search engines has changed")
 	}
 
 	doc.Find(parse.itemSelector).Each(func(_ int, g *goquery.Selection) {
-		link, _ := g.Find(parse.linkSelector).Attr("href")
+		var link string
+		if parse.name != "qwant" {
+			link, _ = g.Find(parse.linkSelector).Attr("href")
+		} else {
+			link = g.Find(parse.linkSelector).Text()
+		}
 		blurb := g.Find(parse.blurbSelector).Text()
 		cleanedLink := s.cleanLinks(link)
 		cleanedBlurb := s.cleanBlurb(blurb)
@@ -79,8 +82,6 @@ func (s *searcher) cleanBlurb(str string) string {
 }
 
 // cleanLinks does a bit of tidying up of each input URL string.
-// bing will sometimes encode the links and I haven't bothered to work
-// out how to decode them. Maybe one day...
 func (s *searcher) cleanLinks(str string) string {
 	u, err := url.QueryUnescape(str)
 	if err != nil {
@@ -93,12 +94,6 @@ func (s *searcher) cleanLinks(str string) string {
 		removePrefix := strings.Split(u, "=")
 		u = removePrefix[1]
 		removeSuffix := strings.Split(u, "&rut")
-		u = removeSuffix[0]
-	}
-	if strings.HasPrefix(u, "https://r.search.yahoo.com/") {
-		removePrefix := strings.Split(u, "/RU=")
-		u = removePrefix[1]
-		removeSuffix := strings.Split(u, "/RK=")
 		u = removeSuffix[0]
 	}
 	return u

@@ -31,11 +31,10 @@ type searcher struct {
 	urls    bool
 
 	// search engines
-	ask   *query
-	bing  *query
-	brave *query
-	duck  *query
-	yahoo *query
+	brave  *query
+	duck   *query
+	mojeek *query
+	qwant  *query
 
 	// other
 	input  io.Reader
