@@ -53,6 +53,10 @@ func (s *searcher) Search(url string) error {
 		parse = s.mojeek
 	case strings.HasPrefix(url, "https://lite.qwant"):
 		parse = s.qwant
+	case strings.HasPrefix(url, "https://bing"):
+		parse = s.bing
+	case strings.HasPrefix(url, "https://search.y"):
+		parse = s.yahoo
 	// return error if we didn't hit one of these!
 	default:
 		return fmt.Errorf("mismatched url, check if one of the search engines has changed")
@@ -94,6 +98,12 @@ func (s *searcher) cleanLinks(str string) string {
 		removePrefix := strings.Split(u, "=")
 		u = removePrefix[1]
 		removeSuffix := strings.Split(u, "&rut")
+		u = removeSuffix[0]
+	}
+	if strings.HasPrefix(u, "https://r.search.yahoo.com/") {
+		removePrefix := strings.Split(u, "/RU=")
+		u = removePrefix[1]
+		removeSuffix := strings.Split(u, "/RK=")
 		u = removeSuffix[0]
 	}
 	return u

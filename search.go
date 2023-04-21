@@ -15,10 +15,11 @@ import (
 
 type searcher struct {
 	// query
-	exact  bool
-	multi  bool
-	search string
-	terms  []string
+	exact   bool
+	multi   bool
+	privacy bool
+	search  string
+	terms   []string
 
 	// requests
 	concurrency int
@@ -31,10 +32,12 @@ type searcher struct {
 	urls    bool
 
 	// search engines
+	bing   *query
 	brave  *query
 	duck   *query
 	mojeek *query
 	qwant  *query
+	yahoo  *query
 
 	// other
 	input  io.Reader
@@ -83,6 +86,7 @@ func FromArgs(args []string) option {
 		// query
 		exact := fset.Bool("e", false, "exact matching")
 		multi := fset.Bool("m", false, "multiple terms")
+		privacy := fset.Bool("p", true, "privacy mode")
 		search := fset.String("s", "", "base search term")
 		//requests
 		concurrency := fset.Int("g", 10, "max number of concurrent requests")
@@ -116,6 +120,7 @@ func FromArgs(args []string) option {
 		s.urls = *urls
 		s.length = *length
 		s.concurrency = *concurrency
+		s.privacy = *privacy
 
 		// get terms from args
 		args = fset.Args()

@@ -11,6 +11,13 @@ type query struct {
 }
 
 func (s *searcher) CreateQueries() {
+	s.bing = &query{
+		base:          "https://bing.com/search?q=",
+		blurbSelector: "div.b_caption p",
+		itemSelector:  "li.b_algo",
+		linkSelector:  "h2 a",
+		name:          "bing",
+	}
 	s.brave = &query{
 		base:          "https://search.brave.com/search?q=",
 		blurbSelector: "div.snippet-content p.snippet-description",
@@ -39,13 +46,20 @@ func (s *searcher) CreateQueries() {
 		linkSelector:  "article[class='web result'] > span",
 		name:          "qwant",
 	}
+	s.yahoo = &query{
+		base:          "https://search.yahoo.com/search?p=",
+		blurbSelector: "div.compText",
+		itemSelector:  "div.algo",
+		linkSelector:  "h3 > a",
+		name:          "yahoo",
+	}
 }
 
 func (s *searcher) FormatURL() <-chan string {
 	// 4 search engines
 	out := make(chan string, len(s.terms)*4)
 	switch {
-	case s.exact:
+	case s.exact && s.privacy:
 		go func() {
 			defer close(out)
 			for _, term := range s.terms {
@@ -55,7 +69,17 @@ func (s *searcher) FormatURL() <-chan string {
 				out <- fmt.Sprintf("%s\"%s+%s\"", s.qwant.base, s.search, term)
 			}
 		}()
-	default:
+	case s.exact:
+		go func() {
+			defer close(out)
+			for _, term := range s.terms {
+				out <- fmt.Sprintf("%s\"%s+%s\"", s.bing.base, s.search, term)
+				out <- fmt.Sprintf("%s\"%s+%s\"", s.brave.base, s.search, term)
+				out <- fmt.Sprintf("%s\"%s+%s\"", s.duck.base, s.search, term)
+				out <- fmt.Sprintf("%s\"%s+%s\"", s.yahoo.base, s.search, term)
+			}
+		}()
+	case s.privacy:
 		go func() {
 			defer close(out)
 			for _, term := range s.terms {
@@ -63,6 +87,16 @@ func (s *searcher) FormatURL() <-chan string {
 				out <- fmt.Sprintf("%s%s+%s", s.duck.base, s.search, term)
 				out <- fmt.Sprintf("%s%s+%s", s.mojeek.base, s.search, term)
 				out <- fmt.Sprintf("%s%s+%s", s.qwant.base, s.search, term)
+			}
+		}()
+	default:
+		go func() {
+			defer close(out)
+			for _, term := range s.terms {
+				out <- fmt.Sprintf("%s%s+%s", s.bing.base, s.search, term)
+				out <- fmt.Sprintf("%s%s+%s", s.brave.base, s.search, term)
+				out <- fmt.Sprintf("%s%s+%s", s.duck.base, s.search, term)
+				out <- fmt.Sprintf("%s%s+%s", s.yahoo.base, s.search, term)
 			}
 		}()
 	}
