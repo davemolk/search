@@ -5,12 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"math/rand"
 	"os"
 	"regexp"
 	"strings"
 	"sync"
-	"time"
 )
 
 type searcher struct {
@@ -160,9 +158,6 @@ func (s *searcher) readTerms() error {
 }
 
 func RunCLI() {
-	// seed random number generator to get random user agents
-	rand.Seed(time.Now().UnixNano())
-
 	s, err := NewSearcher(
 		FromArgs(os.Args[1:]),
 	)
