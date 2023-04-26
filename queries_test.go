@@ -410,6 +410,87 @@ func TestFormatURLSingleTermArgsExactNoPrivacy(t *testing.T) {
 	cmp(t, s.FormatURL(), want)
 }
 
+func TestFormatURLMultipleTermExact(t *testing.T) {
+	t.Parallel()
+	bufInput := bytes.NewBufferString("bar baz\n")
+	args := []string{"-s", "foo", "-m", "-e"}
+	s, err := search.NewSearcher(
+		search.WithInput(bufInput),
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://search.brave.com/search?q="foo+bar+baz"`,
+		`https://html.duckduckgo.com/html?q="foo+bar+baz"`,
+		`https://www.mojeek.com/search?q="foo+bar+baz"`,
+		`https://lite.qwant.com/?q="foo+bar+baz"`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLMultipleTermExactNoPrivacy(t *testing.T) {
+	t.Parallel()
+	bufInput := bytes.NewBufferString("bar baz\n")
+	args := []string{"-s", "foo", "-m", "-e", "-p=false"}
+	s, err := search.NewSearcher(
+		search.WithInput(bufInput),
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://bing.com/search?q="foo+bar+baz"`,
+		`https://search.brave.com/search?q="foo+bar+baz"`,
+		`https://html.duckduckgo.com/html?q="foo+bar+baz"`,
+		`https://search.yahoo.com/search?p="foo+bar+baz"`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLMultipleTermArgsExact(t *testing.T) {
+	t.Parallel()
+	args := []string{"-s", "foo", "-m", "-e", "bar", "baz"}
+	s, err := search.NewSearcher(
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://search.brave.com/search?q="foo+bar+baz"`,
+		`https://html.duckduckgo.com/html?q="foo+bar+baz"`,
+		`https://www.mojeek.com/search?q="foo+bar+baz"`,
+		`https://lite.qwant.com/?q="foo+bar+baz"`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLMultipleTermArgsExactNoPrivacy(t *testing.T) {
+	t.Parallel()
+	args := []string{"-s", "foo", "-m", "-e", "-p=false", "bar", "baz"}
+	s, err := search.NewSearcher(
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://bing.com/search?q="foo+bar+baz"`,
+		`https://search.brave.com/search?q="foo+bar+baz"`,
+		`https://html.duckduckgo.com/html?q="foo+bar+baz"`,
+		`https://search.yahoo.com/search?p="foo+bar+baz"`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+/* searchExact */
 func TestFormatURLSingleTermSearchExact(t *testing.T) {
 	t.Parallel()
 	bufInput := bytes.NewBufferString("bar\n")
@@ -530,6 +611,88 @@ func TestFormatURLMultipleBaseSearchTermArgsSearchExactNoPrivacy(t *testing.T) {
 	cmp(t, s.FormatURL(), want)
 }
 
+/* multiExact */
+func TestFormatURLMultipleTermMultiExact(t *testing.T) {
+	t.Parallel()
+	bufInput := bytes.NewBufferString("bar baz\n")
+	args := []string{"-s", "foo", "-m", "-me"}
+	s, err := search.NewSearcher(
+		search.WithInput(bufInput),
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://search.brave.com/search?q=foo+"bar+baz"`,
+		`https://html.duckduckgo.com/html?q=foo+"bar+baz"`,
+		`https://www.mojeek.com/search?q=foo+"bar+baz"`,
+		`https://lite.qwant.com/?q=foo+"bar+baz"`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLMultipleTermMultiExactNoPrivacy(t *testing.T) {
+	t.Parallel()
+	bufInput := bytes.NewBufferString("bar baz\n")
+	args := []string{"-s", "foo", "-m", "-me", "-p=false"}
+	s, err := search.NewSearcher(
+		search.WithInput(bufInput),
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://bing.com/search?q=foo+"bar+baz"`,
+		`https://search.brave.com/search?q=foo+"bar+baz"`,
+		`https://html.duckduckgo.com/html?q=foo+"bar+baz"`,
+		`https://search.yahoo.com/search?p=foo+"bar+baz"`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLMultipleTermArgsMultiExact(t *testing.T) {
+	t.Parallel()
+	args := []string{"-s", "foo", "-m", "-me", "bar", "baz"}
+	s, err := search.NewSearcher(
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://search.brave.com/search?q=foo+"bar+baz"`,
+		`https://html.duckduckgo.com/html?q=foo+"bar+baz"`,
+		`https://www.mojeek.com/search?q=foo+"bar+baz"`,
+		`https://lite.qwant.com/?q=foo+"bar+baz"`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLMultipleTermArgsMultiExactNoPrivacy(t *testing.T) {
+	t.Parallel()
+	args := []string{"-s", "foo", "-m", "-me", "-p=false", "bar", "baz"}
+	s, err := search.NewSearcher(
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://bing.com/search?q=foo+"bar+baz"`,
+		`https://search.brave.com/search?q=foo+"bar+baz"`,
+		`https://html.duckduckgo.com/html?q=foo+"bar+baz"`,
+		`https://search.yahoo.com/search?p=foo+"bar+baz"`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+/* exact > searchExact > multiExact */
 func TestFormatURLExactHasPriorityOverSearchExact(t *testing.T) {
 	t.Parallel()
 	bufInput := bytes.NewBufferString("baz\n")
@@ -551,10 +714,10 @@ func TestFormatURLExactHasPriorityOverSearchExact(t *testing.T) {
 	cmp(t, s.FormatURL(), want)
 }
 
-func TestFormatURLMultipleTermExact(t *testing.T) {
+func TestFormatURLExactHasPriorityOverMultiExact(t *testing.T) {
 	t.Parallel()
-	bufInput := bytes.NewBufferString("bar baz\n")
-	args := []string{"-s", "foo", "-m", "-e"}
+	bufInput := bytes.NewBufferString("baz\n")
+	args := []string{"-s", "foo bar", "-me", "-e"}
 	s, err := search.NewSearcher(
 		search.WithInput(bufInput),
 		search.FromArgs(args),
@@ -572,10 +735,10 @@ func TestFormatURLMultipleTermExact(t *testing.T) {
 	cmp(t, s.FormatURL(), want)
 }
 
-func TestFormatURLMultipleTermExactNoPrivacy(t *testing.T) {
+func TestFormatURLSearchExactHasPriorityOverMultiExact(t *testing.T) {
 	t.Parallel()
-	bufInput := bytes.NewBufferString("bar baz\n")
-	args := []string{"-s", "foo", "-m", "-e", "-p=false"}
+	bufInput := bytes.NewBufferString("baz\n")
+	args := []string{"-s", "foo bar", "-me", "-se"}
 	s, err := search.NewSearcher(
 		search.WithInput(bufInput),
 		search.FromArgs(args),
@@ -585,52 +748,15 @@ func TestFormatURLMultipleTermExactNoPrivacy(t *testing.T) {
 	}
 	s.CreateQueries()
 	want := []string{
-		`https://bing.com/search?q="foo+bar+baz"`,
-		`https://search.brave.com/search?q="foo+bar+baz"`,
-		`https://html.duckduckgo.com/html?q="foo+bar+baz"`,
-		`https://search.yahoo.com/search?p="foo+bar+baz"`,
+		`https://search.brave.com/search?q="foo+bar"+baz`,
+		`https://html.duckduckgo.com/html?q="foo+bar"+baz`,
+		`https://www.mojeek.com/search?q="foo+bar"+baz`,
+		`https://lite.qwant.com/?q="foo+bar"+baz`,
 	}
 	cmp(t, s.FormatURL(), want)
 }
 
-func TestFormatURLMultipleTermArgsExact(t *testing.T) {
-	t.Parallel()
-	args := []string{"-s", "foo", "-m", "-e", "bar", "baz"}
-	s, err := search.NewSearcher(
-		search.FromArgs(args),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	s.CreateQueries()
-	want := []string{
-		`https://search.brave.com/search?q="foo+bar+baz"`,
-		`https://html.duckduckgo.com/html?q="foo+bar+baz"`,
-		`https://www.mojeek.com/search?q="foo+bar+baz"`,
-		`https://lite.qwant.com/?q="foo+bar+baz"`,
-	}
-	cmp(t, s.FormatURL(), want)
-}
-
-func TestFormatURLMultipleTermArgsExactNoPrivacy(t *testing.T) {
-	t.Parallel()
-	args := []string{"-s", "foo", "-m", "-e", "-p=false", "bar", "baz"}
-	s, err := search.NewSearcher(
-		search.FromArgs(args),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	s.CreateQueries()
-	want := []string{
-		`https://bing.com/search?q="foo+bar+baz"`,
-		`https://search.brave.com/search?q="foo+bar+baz"`,
-		`https://html.duckduckgo.com/html?q="foo+bar+baz"`,
-		`https://search.yahoo.com/search?p="foo+bar+baz"`,
-	}
-	cmp(t, s.FormatURL(), want)
-}
-
+/* helper */
 func cmp(t *testing.T, ch <-chan string, want []string) {
 	t.Helper()
 	var got []string

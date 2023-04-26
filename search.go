@@ -13,8 +13,9 @@ import (
 
 type searcher struct {
 	// query
-	searchExact bool
 	exact       bool
+	searchExact bool
+	multiExact  bool
 	multi       bool
 	privacy     bool
 	search      string
@@ -87,8 +88,9 @@ func FromArgs(args []string) option {
 		privacy := fset.Bool("p", true, "privacy mode")
 		search := fset.String("s", "", "base search term(s)")
 		// exact searching
-		searchExact := fset.Bool("se", false, "exact matching for base search term(s)")
 		exact := fset.Bool("e", false, "exact matching")
+		searchExact := fset.Bool("se", false, "exact matching for base search term(s)")
+		multiExact := fset.Bool("me", false, "exact matching for multiple additional terms")
 		//requests
 		concurrency := fset.Int("g", 10, "max number of concurrent requests")
 		osys := fset.String("os", "w", "m, l, or w")
@@ -113,10 +115,11 @@ func FromArgs(args []string) option {
 			return err
 		}
 
-		s.searchExact = *searchExact
 		s.search = *search
 		s.exact = *exact
+		s.searchExact = *searchExact
 		s.multi = *multi
+		s.multiExact = *multiExact
 		s.osys = *osys
 		s.timeout = *to
 		s.urls = *urls
