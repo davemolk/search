@@ -327,6 +327,9 @@ func TestFormatURLHandleMultipleAndSingleTermsNoPrivacy(t *testing.T) {
 	cmp(t, s.FormatURL(), want)
 }
 
+////////////////////////////////////////
+/* Exact, SearchExact, and TermsExact */
+////////////////////////////////////////
 func TestFormatURLSingleTermExact(t *testing.T) {
 	t.Parallel()
 	bufInput := bytes.NewBufferString("bar\n")
@@ -403,6 +406,147 @@ func TestFormatURLSingleTermArgsExactNoPrivacy(t *testing.T) {
 		`https://search.brave.com/search?q="foo+bar"`,
 		`https://html.duckduckgo.com/html?q="foo+bar"`,
 		`https://search.yahoo.com/search?p="foo+bar"`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLSingleTermSearchExact(t *testing.T) {
+	t.Parallel()
+	bufInput := bytes.NewBufferString("bar\n")
+	args := []string{"-s", "foo", "-se"}
+	s, err := search.NewSearcher(
+		search.WithInput(bufInput),
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://search.brave.com/search?q="foo"+bar`,
+		`https://html.duckduckgo.com/html?q="foo"+bar`,
+		`https://www.mojeek.com/search?q="foo"+bar`,
+		`https://lite.qwant.com/?q="foo"+bar`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLSingleTermSearchExactNoPrivacy(t *testing.T) {
+	t.Parallel()
+	bufInput := bytes.NewBufferString("bar\n")
+	args := []string{"-s", "foo", "-se", "-p=false"}
+	s, err := search.NewSearcher(
+		search.WithInput(bufInput),
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://bing.com/search?q="foo"+bar`,
+		`https://search.brave.com/search?q="foo"+bar`,
+		`https://html.duckduckgo.com/html?q="foo"+bar`,
+		`https://search.yahoo.com/search?p="foo"+bar`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLSingleTermArgsSearchExact(t *testing.T) {
+	t.Parallel()
+	args := []string{"-s", "foo", "-se", "bar"}
+	s, err := search.NewSearcher(
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://search.brave.com/search?q="foo"+bar`,
+		`https://html.duckduckgo.com/html?q="foo"+bar`,
+		`https://www.mojeek.com/search?q="foo"+bar`,
+		`https://lite.qwant.com/?q="foo"+bar`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLSingleTermArgsSearchExactNoPrivacy(t *testing.T) {
+	t.Parallel()
+	args := []string{"-s", "foo", "-se", "-p=false", "bar"}
+	s, err := search.NewSearcher(
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://bing.com/search?q="foo"+bar`,
+		`https://search.brave.com/search?q="foo"+bar`,
+		`https://html.duckduckgo.com/html?q="foo"+bar`,
+		`https://search.yahoo.com/search?p="foo"+bar`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLMultipleBaseSearchTermSearchExact(t *testing.T) {
+	t.Parallel()
+	bufInput := bytes.NewBufferString("baz\n")
+	args := []string{"-s", "foo bar", "-se"}
+	s, err := search.NewSearcher(
+		search.WithInput(bufInput),
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://search.brave.com/search?q="foo+bar"+baz`,
+		`https://html.duckduckgo.com/html?q="foo+bar"+baz`,
+		`https://www.mojeek.com/search?q="foo+bar"+baz`,
+		`https://lite.qwant.com/?q="foo+bar"+baz`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLMultipleBaseSearchTermArgsSearchExactNoPrivacy(t *testing.T) {
+	t.Parallel()
+	args := []string{"-s", "foo bar", "-se", "-p=false", "baz"}
+	s, err := search.NewSearcher(
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://bing.com/search?q="foo+bar"+baz`,
+		`https://search.brave.com/search?q="foo+bar"+baz`,
+		`https://html.duckduckgo.com/html?q="foo+bar"+baz`,
+		`https://search.yahoo.com/search?p="foo+bar"+baz`,
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLExactHasPriorityOverSearchExact(t *testing.T) {
+	t.Parallel()
+	bufInput := bytes.NewBufferString("baz\n")
+	args := []string{"-s", "foo bar", "-se", "-e"}
+	s, err := search.NewSearcher(
+		search.WithInput(bufInput),
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		`https://search.brave.com/search?q="foo+bar+baz"`,
+		`https://html.duckduckgo.com/html?q="foo+bar+baz"`,
+		`https://www.mojeek.com/search?q="foo+bar+baz"`,
+		`https://lite.qwant.com/?q="foo+bar+baz"`,
 	}
 	cmp(t, s.FormatURL(), want)
 }

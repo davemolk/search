@@ -79,6 +79,26 @@ func (s *searcher) FormatURL() <-chan string {
 				out <- fmt.Sprintf("%s\"%s+%s\"", s.yahoo.base, s.search, term)
 			}
 		}()
+	case s.searchExact && s.privacy:
+		go func() {
+			defer close(out)
+			for _, term := range s.terms {
+				out <- fmt.Sprintf("%s\"%s\"+%s", s.brave.base, s.search, term)
+				out <- fmt.Sprintf("%s\"%s\"+%s", s.duck.base, s.search, term)
+				out <- fmt.Sprintf("%s\"%s\"+%s", s.mojeek.base, s.search, term)
+				out <- fmt.Sprintf("%s\"%s\"+%s", s.qwant.base, s.search, term)
+			}
+		}()
+	case s.searchExact:
+		go func() {
+			defer close(out)
+			for _, term := range s.terms {
+				out <- fmt.Sprintf("%s\"%s\"+%s", s.bing.base, s.search, term)
+				out <- fmt.Sprintf("%s\"%s\"+%s", s.brave.base, s.search, term)
+				out <- fmt.Sprintf("%s\"%s\"+%s", s.duck.base, s.search, term)
+				out <- fmt.Sprintf("%s\"%s\"+%s", s.yahoo.base, s.search, term)
+			}
+		}()
 	case s.privacy:
 		go func() {
 			defer close(out)
