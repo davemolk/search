@@ -126,5 +126,5 @@ func (s *searcher) print(blurb, link string) {
 		fmt.Fprintln(s.output, link)
 	}
 	fmt.Fprintln(s.output, blurb)
-	fmt.Println()
+	fmt.Fprintln(s.output)
 }

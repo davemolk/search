@@ -59,6 +59,22 @@ func (s *searcher) FormatURL() <-chan string {
 	// 4 search engines
 	out := make(chan string, len(s.terms)*4)
 	switch {
+	case s.noTerms && s.privacy:
+		go func() {
+			defer close(out)
+			out <- fmt.Sprintf("%s%s", s.brave.base, s.search)
+			out <- fmt.Sprintf("%s%s", s.duck.base, s.search)
+			out <- fmt.Sprintf("%s%s", s.mojeek.base, s.search)
+			out <- fmt.Sprintf("%s%s", s.qwant.base, s.search)
+		}()
+	case s.noTerms:
+		go func() {
+			defer close(out)
+			out <- fmt.Sprintf("%s%s", s.bing.base, s.search)
+			out <- fmt.Sprintf("%s%s", s.brave.base, s.search)
+			out <- fmt.Sprintf("%s%s", s.duck.base, s.search)
+			out <- fmt.Sprintf("%s%s", s.yahoo.base, s.search)
+		}()
 	case s.exact && s.privacy:
 		go func() {
 			defer close(out)

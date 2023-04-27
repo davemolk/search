@@ -9,6 +9,69 @@ import (
 	"github.com/davemolk/search"
 )
 
+//////////////
+/* no terms */
+//////////////
+func TestFormatURLNoTerms(t *testing.T) {
+	t.Parallel()
+	args := []string{"-s", "foo", "-n"}
+	s, err := search.NewSearcher(
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		"https://search.brave.com/search?q=foo",
+		"https://html.duckduckgo.com/html?q=foo",
+		"https://www.mojeek.com/search?q=foo",
+		"https://lite.qwant.com/?q=foo",
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLNoTermsNoPrivacy(t *testing.T) {
+	t.Parallel()
+	args := []string{"-s", "foo", "-n", "-p=false"}
+	s, err := search.NewSearcher(
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		"https://bing.com/search?q=foo",
+		"https://search.brave.com/search?q=foo",
+		"https://html.duckduckgo.com/html?q=foo",
+		"https://search.yahoo.com/search?p=foo",
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+func TestFormatURLNoTermsMultiTermBase(t *testing.T) {
+	t.Parallel()
+	args := []string{"-s", "foo bar baz", "-n"}
+	s, err := search.NewSearcher(
+		search.FromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.CreateQueries()
+	want := []string{
+		"https://search.brave.com/search?q=foo+bar+baz",
+		"https://html.duckduckgo.com/html?q=foo+bar+baz",
+		"https://www.mojeek.com/search?q=foo+bar+baz",
+		"https://lite.qwant.com/?q=foo+bar+baz",
+	}
+	cmp(t, s.FormatURL(), want)
+}
+
+///////////
+/* terms */
+///////////
 func TestFormatURLSingleTerm(t *testing.T) {
 	t.Parallel()
 	bufInput := bytes.NewBufferString("bar")

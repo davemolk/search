@@ -17,6 +17,7 @@ type searcher struct {
 	searchExact bool
 	multiExact  bool
 	multi       bool
+	noTerms     bool
 	privacy     bool
 	search      string
 	terms       []string
@@ -85,6 +86,7 @@ func FromArgs(args []string) option {
 		fset := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 		// query
 		multi := fset.Bool("m", false, "multiple terms")
+		noTerms := fset.Bool("n", false, "no additional search terms")
 		privacy := fset.Bool("p", true, "privacy mode")
 		search := fset.String("s", "", "base search term(s)")
 		// exact searching
@@ -120,6 +122,7 @@ func FromArgs(args []string) option {
 		s.searchExact = *searchExact
 		s.multi = *multi
 		s.multiExact = *multiExact
+		s.noTerms = *noTerms
 		s.osys = *osys
 		s.timeout = *to
 		s.urls = *urls
@@ -127,6 +130,10 @@ func FromArgs(args []string) option {
 		s.concurrency = *concurrency
 		s.privacy = *privacy
 
+		// no additional search terms
+		if s.noTerms {
+			return nil
+		}
 		// get terms from args
 		args = fset.Args()
 		if len(args) > 0 {
