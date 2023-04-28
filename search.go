@@ -2,6 +2,7 @@ package search
 
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -24,6 +25,7 @@ type searcher struct {
 
 	// requests
 	concurrency int
+	debug       bool
 	osys        string
 	timeout     int
 
@@ -81,6 +83,52 @@ func WithOutput(output io.Writer) option {
 	}
 }
 
+var errHelp = errors.New(`usage:
+basic query info
+-m  additional search terms include multiple terms
+	-s foo -m bar baz => https://search.brave.com/search?q=foo+bar+baz
+	default: false
+-n  no additional search terms
+	-s foo => https://search.brave.com/search?q=foo
+	default: false
+-p  privacy mode (when using privacy mode, will search brave, duck duck go, mojeek, and qwant,
+	otherwise, will search bing, duck duck go, brave, and yahoo)
+	default: true
+-s  base search term(s)
+
+
+exact searching
+-e  exact searching for query
+	-s foo bar -e => https://search.brave.com/search?q="foo+bar"
+	default: false
+-me exact matching for additional terms
+	-s 
+-se exact matching for search term(s)
+	-s "foo bar" -se baz => https://search.brave.com/search?q="foo+bar"+baz
+	default: false
+
+
+requests
+-c  max number of concurrent requests
+	default: 10
+-os operating system (used for creating browser headers)
+	arguments: any, l, m, or w
+	default: w
+-t  request timeout, in ms
+	default: 5000
+
+output
+-l  length of result summary
+	default: 500
+-u  include result urls in output
+	default: true
+
+	
+help
+-d  print the search url to help debug queries
+	default: false
+-h  help`)
+
 func FromArgs(args []string) option {
 	return func(s *searcher) error {
 		fset := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
@@ -91,20 +139,26 @@ func FromArgs(args []string) option {
 		search := fset.String("s", "", "base search term(s)")
 		// exact searching
 		exact := fset.Bool("e", false, "exact matching")
-		searchExact := fset.Bool("se", false, "exact matching for base search term(s)")
 		multiExact := fset.Bool("me", false, "exact matching for multiple additional terms")
+		searchExact := fset.Bool("se", false, "exact matching for base search term(s)")
 		//requests
-		concurrency := fset.Int("g", 10, "max number of concurrent requests")
-		osys := fset.String("os", "w", "m, l, or w")
-		to := fset.Int("to", 5000, "timeout in ms")
+		concurrency := fset.Int("c", 10, "max number of concurrent requests")
+		osys := fset.String("os", "w", "l, m, or w")
+		to := fset.Int("t", 5000, "timeout in ms")
 		// output
 		length := fset.Int("l", 500, "length of blurb")
-		urls := fset.Bool("u", false, "print urls")
+		urls := fset.Bool("u", true, "print urls")
+		// help
+		debug := fset.Bool("d", false, "print the search url to help debug queries")
+		help := fset.Bool("h", false, "")
 		fset.SetOutput(s.output)
 
 		err := fset.Parse(args)
 		if err != nil {
 			return err
+		}
+		if *help {
+			return errHelp
 		}
 
 		err = s.validateTerms(*search)
@@ -117,22 +171,27 @@ func FromArgs(args []string) option {
 			return err
 		}
 
-		s.search = *search
+		s.concurrency = *concurrency
+		s.debug = *debug
 		s.exact = *exact
-		s.searchExact = *searchExact
+		s.length = *length
 		s.multi = *multi
 		s.multiExact = *multiExact
 		s.noTerms = *noTerms
 		s.osys = *osys
+		s.privacy = *privacy
+		s.search = *search
+		s.searchExact = *searchExact
 		s.timeout = *to
 		s.urls = *urls
-		s.length = *length
-		s.concurrency = *concurrency
-		s.privacy = *privacy
 
 		// no additional search terms
 		if s.noTerms {
 			return nil
+		}
+		// in case user forgot
+		if s.multiExact {
+			s.multi = true
 		}
 		// get terms from args
 		args = fset.Args()
@@ -183,6 +242,11 @@ func RunCLI() {
 	s.CreateQueries()
 	ch := s.FormatURL()
 
+	// for c := range ch {
+	// 	fmt.Println(c)
+	// }
+	// log.Fatal()
+
 	tokens := make(chan struct{}, s.concurrency)
 	var wg sync.WaitGroup
 	for c := range ch {
@@ -193,6 +257,12 @@ func RunCLI() {
 			defer func() { <-tokens }()
 			s.Search(c)
 		}(c)
+		if s.debug {
+			fmt.Println("*****")
+			fmt.Println("query:", c)
+			fmt.Println("*****")
+			fmt.Println()
+		}
 	}
 
 	wg.Wait()

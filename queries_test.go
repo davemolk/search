@@ -9,9 +9,9 @@ import (
 	"github.com/davemolk/search"
 )
 
-//////////////
-/* no terms */
-//////////////
+/////////////////////////////////
+/* no additional search terms */
+///////////////////////////////
 func TestFormatURLNoTerms(t *testing.T) {
 	t.Parallel()
 	args := []string{"-s", "foo", "-n"}
@@ -28,7 +28,7 @@ func TestFormatURLNoTerms(t *testing.T) {
 		"https://www.mojeek.com/search?q=foo",
 		"https://lite.qwant.com/?q=foo",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLNoTermsNoPrivacy(t *testing.T) {
@@ -47,7 +47,7 @@ func TestFormatURLNoTermsNoPrivacy(t *testing.T) {
 		"https://html.duckduckgo.com/html?q=foo",
 		"https://search.yahoo.com/search?p=foo",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLNoTermsMultiTermBase(t *testing.T) {
@@ -66,12 +66,12 @@ func TestFormatURLNoTermsMultiTermBase(t *testing.T) {
 		"https://www.mojeek.com/search?q=foo+bar+baz",
 		"https://lite.qwant.com/?q=foo+bar+baz",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
-///////////
-/* terms */
-///////////
+////////////////////////////////////////
+/* including additional search terms */
+//////////////////////////////////////
 func TestFormatURLSingleTerm(t *testing.T) {
 	t.Parallel()
 	bufInput := bytes.NewBufferString("bar")
@@ -90,7 +90,7 @@ func TestFormatURLSingleTerm(t *testing.T) {
 		"https://www.mojeek.com/search?q=foo+bar",
 		"https://lite.qwant.com/?q=foo+bar",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLSingleTermNoPrivacy(t *testing.T) {
@@ -111,7 +111,7 @@ func TestFormatURLSingleTermNoPrivacy(t *testing.T) {
 		"https://html.duckduckgo.com/html?q=foo+bar",
 		"https://search.yahoo.com/search?p=foo+bar",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLSingleTermArg(t *testing.T) {
@@ -130,7 +130,7 @@ func TestFormatURLSingleTermArg(t *testing.T) {
 		"https://www.mojeek.com/search?q=foo+bar",
 		"https://lite.qwant.com/?q=foo+bar",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLSingleTermArgNoPrivacy(t *testing.T) {
@@ -149,7 +149,7 @@ func TestFormatURLSingleTermArgNoPrivacy(t *testing.T) {
 		"https://html.duckduckgo.com/html?q=foo+bar",
 		"https://search.yahoo.com/search?p=foo+bar",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleTerms(t *testing.T) {
@@ -174,7 +174,7 @@ func TestFormatURLMultipleTerms(t *testing.T) {
 		"https://www.mojeek.com/search?q=foo+baz",
 		"https://lite.qwant.com/?q=foo+baz",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleTermsNoPrivacy(t *testing.T) {
@@ -199,7 +199,7 @@ func TestFormatURLMultipleTermsNoPrivacy(t *testing.T) {
 		"https://html.duckduckgo.com/html?q=foo+baz",
 		"https://search.yahoo.com/search?p=foo+baz",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleTermArgs(t *testing.T) {
@@ -222,7 +222,7 @@ func TestFormatURLMultipleTermArgs(t *testing.T) {
 		"https://www.mojeek.com/search?q=foo+baz",
 		"https://lite.qwant.com/?q=foo+baz",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleTermArgsNoPrivacy(t *testing.T) {
@@ -245,7 +245,7 @@ func TestFormatURLMultipleTermArgsNoPrivacy(t *testing.T) {
 		"https://html.duckduckgo.com/html?q=foo+baz",
 		"https://search.yahoo.com/search?p=foo+baz",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLCombineTerms(t *testing.T) {
@@ -269,7 +269,7 @@ func TestFormatURLCombineTerms(t *testing.T) {
 		"https://www.mojeek.com/search?q=foo+bar+baz",
 		"https://lite.qwant.com/?q=foo+bar+baz",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLCombineTermsNoPrivacy(t *testing.T) {
@@ -293,7 +293,7 @@ func TestFormatURLCombineTermsNoPrivacy(t *testing.T) {
 		"https://html.duckduckgo.com/html?q=foo+bar+baz",
 		"https://search.yahoo.com/search?p=foo+bar+baz",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLCombineTermsArgs(t *testing.T) {
@@ -312,7 +312,7 @@ func TestFormatURLCombineTermsArgs(t *testing.T) {
 		"https://www.mojeek.com/search?q=foo+bar+baz",
 		"https://lite.qwant.com/?q=foo+bar+baz",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLCombineTermsArgsNoPrivacy(t *testing.T) {
@@ -331,7 +331,7 @@ func TestFormatURLCombineTermsArgsNoPrivacy(t *testing.T) {
 		"https://html.duckduckgo.com/html?q=foo+bar+baz",
 		"https://search.yahoo.com/search?p=foo+bar+baz",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLHandleMultipleAndSingleTerms(t *testing.T) {
@@ -359,7 +359,7 @@ func TestFormatURLHandleMultipleAndSingleTerms(t *testing.T) {
 		"https://www.mojeek.com/search?q=foo+go+golang",
 		"https://lite.qwant.com/?q=foo+go+golang",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLHandleMultipleAndSingleTermsNoPrivacy(t *testing.T) {
@@ -387,12 +387,12 @@ func TestFormatURLHandleMultipleAndSingleTermsNoPrivacy(t *testing.T) {
 		"https://html.duckduckgo.com/html?q=foo+go+golang",
 		"https://search.yahoo.com/search?p=foo+go+golang",
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
-////////////////////////////////////////
+/////////////////////////////////////////
 /* Exact, SearchExact, and TermsExact */
-////////////////////////////////////////
+///////////////////////////////////////
 func TestFormatURLSingleTermExact(t *testing.T) {
 	t.Parallel()
 	bufInput := bytes.NewBufferString("bar\n")
@@ -411,7 +411,7 @@ func TestFormatURLSingleTermExact(t *testing.T) {
 		`https://www.mojeek.com/search?q="foo+bar"`,
 		`https://lite.qwant.com/?q="foo+bar"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLSingleTermExactNoPrivacy(t *testing.T) {
@@ -432,7 +432,7 @@ func TestFormatURLSingleTermExactNoPrivacy(t *testing.T) {
 		`https://html.duckduckgo.com/html?q="foo+bar"`,
 		`https://search.yahoo.com/search?p="foo+bar"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLSingleTermArgsExact(t *testing.T) {
@@ -451,7 +451,7 @@ func TestFormatURLSingleTermArgsExact(t *testing.T) {
 		`https://www.mojeek.com/search?q="foo+bar"`,
 		`https://lite.qwant.com/?q="foo+bar"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLSingleTermArgsExactNoPrivacy(t *testing.T) {
@@ -470,7 +470,7 @@ func TestFormatURLSingleTermArgsExactNoPrivacy(t *testing.T) {
 		`https://html.duckduckgo.com/html?q="foo+bar"`,
 		`https://search.yahoo.com/search?p="foo+bar"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleTermExact(t *testing.T) {
@@ -491,7 +491,7 @@ func TestFormatURLMultipleTermExact(t *testing.T) {
 		`https://www.mojeek.com/search?q="foo+bar+baz"`,
 		`https://lite.qwant.com/?q="foo+bar+baz"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleTermExactNoPrivacy(t *testing.T) {
@@ -512,7 +512,7 @@ func TestFormatURLMultipleTermExactNoPrivacy(t *testing.T) {
 		`https://html.duckduckgo.com/html?q="foo+bar+baz"`,
 		`https://search.yahoo.com/search?p="foo+bar+baz"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleTermArgsExact(t *testing.T) {
@@ -531,7 +531,7 @@ func TestFormatURLMultipleTermArgsExact(t *testing.T) {
 		`https://www.mojeek.com/search?q="foo+bar+baz"`,
 		`https://lite.qwant.com/?q="foo+bar+baz"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleTermArgsExactNoPrivacy(t *testing.T) {
@@ -550,7 +550,7 @@ func TestFormatURLMultipleTermArgsExactNoPrivacy(t *testing.T) {
 		`https://html.duckduckgo.com/html?q="foo+bar+baz"`,
 		`https://search.yahoo.com/search?p="foo+bar+baz"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 /* searchExact */
@@ -572,7 +572,7 @@ func TestFormatURLSingleTermSearchExact(t *testing.T) {
 		`https://www.mojeek.com/search?q="foo"+bar`,
 		`https://lite.qwant.com/?q="foo"+bar`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLSingleTermSearchExactNoPrivacy(t *testing.T) {
@@ -593,7 +593,7 @@ func TestFormatURLSingleTermSearchExactNoPrivacy(t *testing.T) {
 		`https://html.duckduckgo.com/html?q="foo"+bar`,
 		`https://search.yahoo.com/search?p="foo"+bar`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLSingleTermArgsSearchExact(t *testing.T) {
@@ -612,7 +612,7 @@ func TestFormatURLSingleTermArgsSearchExact(t *testing.T) {
 		`https://www.mojeek.com/search?q="foo"+bar`,
 		`https://lite.qwant.com/?q="foo"+bar`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLSingleTermArgsSearchExactNoPrivacy(t *testing.T) {
@@ -631,7 +631,7 @@ func TestFormatURLSingleTermArgsSearchExactNoPrivacy(t *testing.T) {
 		`https://html.duckduckgo.com/html?q="foo"+bar`,
 		`https://search.yahoo.com/search?p="foo"+bar`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleBaseSearchTermSearchExact(t *testing.T) {
@@ -652,7 +652,7 @@ func TestFormatURLMultipleBaseSearchTermSearchExact(t *testing.T) {
 		`https://www.mojeek.com/search?q="foo+bar"+baz`,
 		`https://lite.qwant.com/?q="foo+bar"+baz`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleBaseSearchTermArgsSearchExactNoPrivacy(t *testing.T) {
@@ -671,14 +671,14 @@ func TestFormatURLMultipleBaseSearchTermArgsSearchExactNoPrivacy(t *testing.T) {
 		`https://html.duckduckgo.com/html?q="foo+bar"+baz`,
 		`https://search.yahoo.com/search?p="foo+bar"+baz`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 /* multiExact */
 func TestFormatURLMultipleTermMultiExact(t *testing.T) {
 	t.Parallel()
 	bufInput := bytes.NewBufferString("bar baz\n")
-	args := []string{"-s", "foo", "-m", "-me"}
+	args := []string{"-s", "foo", "-me"}
 	s, err := search.NewSearcher(
 		search.WithInput(bufInput),
 		search.FromArgs(args),
@@ -693,13 +693,13 @@ func TestFormatURLMultipleTermMultiExact(t *testing.T) {
 		`https://www.mojeek.com/search?q=foo+"bar+baz"`,
 		`https://lite.qwant.com/?q=foo+"bar+baz"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleTermMultiExactNoPrivacy(t *testing.T) {
 	t.Parallel()
 	bufInput := bytes.NewBufferString("bar baz\n")
-	args := []string{"-s", "foo", "-m", "-me", "-p=false"}
+	args := []string{"-s", "foo", "-me", "-p=false"}
 	s, err := search.NewSearcher(
 		search.WithInput(bufInput),
 		search.FromArgs(args),
@@ -714,12 +714,12 @@ func TestFormatURLMultipleTermMultiExactNoPrivacy(t *testing.T) {
 		`https://html.duckduckgo.com/html?q=foo+"bar+baz"`,
 		`https://search.yahoo.com/search?p=foo+"bar+baz"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleTermArgsMultiExact(t *testing.T) {
 	t.Parallel()
-	args := []string{"-s", "foo", "-m", "-me", "bar", "baz"}
+	args := []string{"-s", "foo", "-me", "bar", "baz"}
 	s, err := search.NewSearcher(
 		search.FromArgs(args),
 	)
@@ -733,12 +733,12 @@ func TestFormatURLMultipleTermArgsMultiExact(t *testing.T) {
 		`https://www.mojeek.com/search?q=foo+"bar+baz"`,
 		`https://lite.qwant.com/?q=foo+"bar+baz"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLMultipleTermArgsMultiExactNoPrivacy(t *testing.T) {
 	t.Parallel()
-	args := []string{"-s", "foo", "-m", "-me", "-p=false", "bar", "baz"}
+	args := []string{"-s", "foo", "-me", "-p=false", "bar", "baz"}
 	s, err := search.NewSearcher(
 		search.FromArgs(args),
 	)
@@ -752,7 +752,7 @@ func TestFormatURLMultipleTermArgsMultiExactNoPrivacy(t *testing.T) {
 		`https://html.duckduckgo.com/html?q=foo+"bar+baz"`,
 		`https://search.yahoo.com/search?p=foo+"bar+baz"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 /* exact > searchExact > multiExact */
@@ -774,7 +774,7 @@ func TestFormatURLExactHasPriorityOverSearchExact(t *testing.T) {
 		`https://www.mojeek.com/search?q="foo+bar+baz"`,
 		`https://lite.qwant.com/?q="foo+bar+baz"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLExactHasPriorityOverMultiExact(t *testing.T) {
@@ -795,7 +795,7 @@ func TestFormatURLExactHasPriorityOverMultiExact(t *testing.T) {
 		`https://www.mojeek.com/search?q="foo+bar+baz"`,
 		`https://lite.qwant.com/?q="foo+bar+baz"`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
 func TestFormatURLSearchExactHasPriorityOverMultiExact(t *testing.T) {
@@ -816,11 +816,13 @@ func TestFormatURLSearchExactHasPriorityOverMultiExact(t *testing.T) {
 		`https://www.mojeek.com/search?q="foo+bar"+baz`,
 		`https://lite.qwant.com/?q="foo+bar"+baz`,
 	}
-	cmp(t, s.FormatURL(), want)
+	compare(t, s.FormatURL(), want)
 }
 
+/////////////
 /* helper */
-func cmp(t *testing.T, ch <-chan string, want []string) {
+///////////
+func compare(t *testing.T, ch <-chan string, want []string) {
 	t.Helper()
 	var got []string
 	for c := range ch {
