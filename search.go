@@ -196,7 +196,7 @@ func FromArgs(args []string) option {
 		// get terms from args
 		args = fset.Args()
 		if len(args) > 0 {
-			if *multi {
+			if s.multi {
 				m := strings.Join(args, "+")
 				args = []string{m}
 			}
@@ -242,11 +242,6 @@ func RunCLI() {
 	s.CreateQueries()
 	ch := s.FormatURL()
 
-	// for c := range ch {
-	// 	fmt.Println(c)
-	// }
-	// log.Fatal()
-
 	tokens := make(chan struct{}, s.concurrency)
 	var wg sync.WaitGroup
 	for c := range ch {
@@ -264,6 +259,5 @@ func RunCLI() {
 			fmt.Println()
 		}
 	}
-
 	wg.Wait()
 }

@@ -24,16 +24,21 @@ func (s *searcher) Search(url string) error {
 		return fmt.Errorf("unable to create request for %s: %v", url, err)
 	}
 
-	h, err := fuzzyHelpers.NewHeaders(
+	// mimic browser headers
+	h := fuzzyHelpers.NewHeaders(
+		// set Host header
 		fuzzyHelpers.WithURL(url),
+		// match ua with local computer
+		fuzzyHelpers.WithOS(s.osys),
 	)
-	if err != nil {
-		return fmt.Errorf("error with header creation for %s: %v", url, err)
-	}
-	headers := h.Headers()
-	req.Header = headers
+	req.Header = h.Headers()
 
-	resp, err := http.DefaultClient.Do(req)
+	// get client
+	c := fuzzyHelpers.NewClient(
+		fuzzyHelpers.WithConnections(s.concurrency),
+	)
+
+	resp, err := c.Do(req)
 	if err != nil {
 		return fmt.Errorf("unable to make request for %s: %v", url, err)
 	}
