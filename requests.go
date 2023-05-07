@@ -33,12 +33,7 @@ func (s *searcher) Search(url string) error {
 	)
 	req.Header = h.Headers()
 
-	// get client
-	c := fuzzyHelpers.NewClient(
-		fuzzyHelpers.WithConnections(s.concurrency),
-	)
-
-	resp, err := c.Do(req)
+	resp, err := s.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("unable to make request for %s: %v", url, err)
 	}

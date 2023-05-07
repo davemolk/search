@@ -6,10 +6,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/davemolk/fuzzyHelpers"
 )
 
 type searcher struct {
@@ -24,6 +27,7 @@ type searcher struct {
 	terms       []string
 
 	// requests
+	client      *http.Client
 	concurrency int
 	debug       bool
 	osys        string
@@ -85,26 +89,27 @@ func WithOutput(output io.Writer) option {
 
 var errHelp = errors.New(`usage:
 basic query info
--m  additional search terms include multiple terms
-	-s foo -m bar baz => https://search.brave.com/search?q=foo+bar+baz
+-m  include multiple terms within a single query
+	search -s foo -m bar baz => https://search.brave.com/search?q=foo+bar+baz, etc.
 	default: false
 -n  no additional search terms
-	-s foo => https://search.brave.com/search?q=foo
+	search -s foo => https://search.brave.com/search?q=foo, etc.
 	default: false
--p  privacy mode (when using privacy mode, will search brave, duck duck go, mojeek, and qwant,
-	otherwise, will search bing, duck duck go, brave, and yahoo)
+-p  privacy mode (when true, searches brave, duck duck go, mojeek, and qwant,
+	otherwise, searches bing, duck duck go, brave, and yahoo)
 	default: true
 -s  base search term(s)
 
 
 exact searching
--e  exact searching for query
-	-s foo bar -e => https://search.brave.com/search?q="foo+bar"
+-e  exact searching for entire query
+	search -s foo bar -e => https://search.brave.com/search?q="foo+bar", etc.
 	default: false
 -me exact matching for additional terms
-	-s 
+	search -s foo -me bar baz => https://search.brave.com/search?q=foo+"bar+baz", etc.
+    default: false
 -se exact matching for search term(s)
-	-s "foo bar" -se baz => https://search.brave.com/search?q="foo+bar"+baz
+	search -s "foo bar" -se baz => https://search.brave.com/search?q="foo+bar"+baz, etc.
 	default: false
 
 
@@ -184,6 +189,9 @@ func FromArgs(args []string) option {
 		s.searchExact = *searchExact
 		s.timeout = *to
 		s.urls = *urls
+		s.client = fuzzyHelpers.NewClient(
+			fuzzyHelpers.WithConnections(s.concurrency),
+		)
 
 		// no additional search terms
 		if s.noTerms {
